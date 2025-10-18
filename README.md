@@ -16,7 +16,7 @@ Code Composer Studio (CCS) is an IDE that comprises a suite of tools used to dev
 ### Run directly
 
 ```bash
-NIXPKGS_ALLOW_UNFREE=1 nix run github:yourusername/ccs-nix --impure
+NIXPKGS_ALLOW_UNFREE=1 nix run github:abeljim/ccs-nix --impure
 ```
 
 ### Build and install
@@ -32,7 +32,7 @@ NIXPKGS_ALLOW_UNFREE=1 nix build --impure
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    ccs-nix.url = "github:yourusername/ccs-nix";
+    ccs-nix.url = "github:abeljim/ccs-nix";
   };
 
   outputs = { self, nixpkgs, ccs-nix }: {
@@ -51,7 +51,7 @@ Add to your Home Manager configuration:
 
 {
   # Add ccs-nix as a flake input in your flake.nix first
-  # inputs.ccs-nix.url = "github:yourusername/ccs-nix";
+  # inputs.ccs-nix.url = "github:abeljim/ccs-nix";
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -76,7 +76,7 @@ Or if you're using standalone Home Manager (not as a NixOS module):
 
 let
   ccs-nix = builtins.fetchGit {
-    url = "https://github.com/yourusername/ccs-nix";
+    url = "https://github.com/abeljim/ccs-nix";
     ref = "main";
   };
   ccsPackages = (import ccs-nix).packages.${pkgs.system};
@@ -136,7 +136,7 @@ defaultEnabledComponents = [
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    ccs-nix.url = "github:yourusername/ccs-nix";
+    ccs-nix.url = "github:abeljim/ccs-nix";
   };
 
   outputs = { self, nixpkgs, ccs-nix }:
