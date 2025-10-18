@@ -20,7 +20,38 @@
       otherVersion = "00005";
       versionNumberDots = "${majorVersion}.${minorVersion}.${patchVersion}";
       versionNumberUnderscores = "${majorVersion}_${minorVersion}_${patchVersion}";
-      ccstudio-unwrapped = pkgs.stdenv.mkDerivation rec {
+
+      # Default enabled components - all available options
+      # Valid values according to CCS installer:
+      # PF_SITARA_MCU PF_ARM_MPU PF_C28 PF_C6000SC PF_HERCULES PF_MMWAVE
+      # PF_MSP430 PF_MSPM0 PF_MSPM33 PF_OMAPL PF_PGA PF_MSP432
+      # PF_AUTO PF_TM4C PF_DIGITAL_POWER PF_WCONN
+      defaultEnabledComponents = [
+        "PF_SITARA_MCU"    # Sitara AM2x MCUs
+        "PF_ARM_MPU"       # ARM-based MPUs (Sitara AM3x, AM4x, AM5x, AM6x, etc.)
+        "PF_C28"           # C2000 real-time MCUs
+        "PF_C6000SC"       # C6000 Power-Optimized DSP
+        "PF_HERCULES"      # Hercules Safety MCUs
+        "PF_MMWAVE"        # mmWave Sensors
+        "PF_MSP430"        # MSP430 ultra-low power MCUs
+        "PF_MSPM0"         # MSPM0 32-bit Arm Cortex-M0+ General Purpose MCUs
+        "PF_MSPM33"        # MSPM33 MCUs
+        "PF_OMAPL"         # OMAP-L1x DSP + ARM9 Processor
+        "PF_PGA"           # PGA Sensor Signal Conditioners
+        "PF_MSP432"        # SimpleLink MSP432 low power + performance MCUs
+        "PF_AUTO"          # Automotive processors
+        "PF_TM4C"          # TM4C12x ARM Cortex-M4F core-based MCUs
+        "PF_DIGITAL_POWER" # UCD Digital Power Controllers
+        "PF_WCONN"         # Wireless connectivity
+      ];
+
+      # Override enabledComponents to customize which TI components are installed
+      # Example: ccstudio-unwrapped.override { enabledComponents = [ "PF_C28" "PF_MSP430" ]; }
+      ccstudio-unwrapped = pkgs.callPackage ({
+        stdenv,
+        lib,
+        enabledComponents ? defaultEnabledComponents,
+      }: stdenv.mkDerivation rec {
         pname = "ccstudio";
         version = "${versionNumberDots}.${otherVersion}";
 
@@ -133,7 +164,7 @@
           patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" \
             ${installer}
           # fakeroot necessary because blackhawk refuses to install without it.
-          ${installerFHS}/bin/ccstuido -c "export PATH=$PATH:/build/fake-bin && fakeroot ${installer} --mode unattended --prefix /build/ti" --enable-components PF_C28
+          ${installerFHS}/bin/ccstuido -c "export PATH=$PATH:/build/fake-bin && fakeroot ${installer} --mode unattended --prefix /build/ti --enable-components ${lib.concatStringsSep "," enabledComponents}"
           mkdir -p $out/share/applications
           cp ${desktopItem}/share/applications/* $out/share/applications
           mkdir -p "$out/opt"
@@ -143,7 +174,7 @@
           ln -s $out/opt/ccs/doc/ccs.ico $out/share/icons/hicolor/256x256/apps/ccs.ico
           runHook postInstall
         '';
-      };
+      }) {};
     in {
       packages.default = pkgs.buildFHSEnv {
         name = "ccstudio";
@@ -213,6 +244,7 @@
       };
 
       packages.ccstudio = self.packages.${system}.default;
+      packages.ccstudio-unwrapped = ccstudio-unwrapped;
 
       apps.default = {
         type = "app";
