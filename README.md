@@ -42,6 +42,54 @@ NIXPKGS_ALLOW_UNFREE=1 nix build --impure
 }
 ```
 
+### Use with Home Manager
+
+Add to your Home Manager configuration:
+
+```nix
+{ inputs, pkgs, ... }:
+
+{
+  # Add ccs-nix as a flake input in your flake.nix first
+  # inputs.ccs-nix.url = "github:yourusername/ccs-nix";
+
+  # Allow unfree packages
+  nixpkgs.config.allowUnfree = true;
+
+  # Add to home packages
+  home.packages = [
+    # Option 1: Use default with all components
+    inputs.ccs-nix.packages.${pkgs.system}.default
+
+    # Option 2: Use with custom components
+    # (inputs.ccs-nix.packages.${pkgs.system}.ccstudio-unwrapped.override {
+    #   enabledComponents = [ "PF_C28" "PF_MSP430" ];
+    # })
+  ];
+}
+```
+
+Or if you're using standalone Home Manager (not as a NixOS module):
+
+```nix
+{ config, pkgs, ... }:
+
+let
+  ccs-nix = builtins.fetchGit {
+    url = "https://github.com/yourusername/ccs-nix";
+    ref = "main";
+  };
+  ccsPackages = (import ccs-nix).packages.${pkgs.system};
+in
+{
+  nixpkgs.config.allowUnfree = true;
+
+  home.packages = [
+    ccsPackages.default
+  ];
+}
+```
+
 ## Configuration
 
 ### Customizing Installed Components
