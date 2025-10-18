@@ -77,9 +77,9 @@
         };
 
         desktopItem = pkgs.makeDesktopItem {
-          name = "ccstuido";
+          name = "ccstudio";
           desktopName = "Code Composer Studio";
-          exec = "ccstuido";
+          exec = "ccstudio";
           icon = "ccs";
           comment = "IDE for TI's microcontrollers and processors";
           categories = ["Development"];
@@ -146,7 +146,7 @@
 
         installPhase = let
           installerFHS = pkgs.buildFHSEnv {
-            name = "ccstuido";
+            name = "ccstudio";
             targetPkgs = pkgs: [pkgs.fakeroot] ++ buildInputs;
             extraBwrapArgs = [
               "--bind $out/etc/udev/rules.d /etc/udev/rules.d"
@@ -164,7 +164,7 @@
           patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" \
             ${installer}
           # fakeroot necessary because blackhawk refuses to install without it.
-          ${installerFHS}/bin/ccstuido -c "export PATH=$PATH:/build/fake-bin && fakeroot ${installer} --mode unattended --prefix /build/ti --enable-components ${lib.concatStringsSep "," enabledComponents}"
+          ${installerFHS}/bin/ccstudio -c "export PATH=$PATH:/build/fake-bin && fakeroot ${installer} --mode unattended --prefix /build/ti --enable-components ${lib.concatStringsSep "," enabledComponents}"
           mkdir -p $out/share/applications
           cp ${desktopItem}/share/applications/* $out/share/applications
           mkdir -p "$out/opt"
