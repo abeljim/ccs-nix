@@ -178,8 +178,8 @@
           runHook postInstall
         '';
       }) {};
-    in {
-      packages.default = (pkgs.buildFHSEnv {
+
+      ccstudio-fhs = pkgs.buildFHSEnv {
         name = "ccstudio";
         targetPkgs = pkgs:
           with pkgs; [
@@ -244,15 +244,16 @@
           mainProgram = "ccstudio";
           platforms = ["x86_64-linux"];
         };
-      }).overrideAttrs (oldAttrs: {
-        # Add desktop file and icon from unwrapped package
-        postBuild = ''
-          mkdir -p $out/share/applications
-          mkdir -p $out/share/icons/hicolor/256x256/apps
-          cp -r ${ccstudio-unwrapped}/share/applications/* $out/share/applications/
-          cp -r ${ccstudio-unwrapped}/share/icons/hicolor/256x256/apps/* $out/share/icons/hicolor/256x256/apps/
-        '';
-      });
+      };
+    in {
+      packages.default = pkgs.symlinkJoin {
+        name = "ccstudio";
+        paths = [
+          ccstudio-fhs
+          ccstudio-unwrapped
+        ];
+        meta = ccstudio-fhs.meta;
+      };
 
       packages.ccstudio = self.packages.${system}.default;
       packages.ccstudio-unwrapped = ccstudio-unwrapped;
