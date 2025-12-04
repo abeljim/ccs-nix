@@ -235,6 +235,13 @@
           ];
 
         runScript = pkgs.writeShellScript "ccstudio-wrapper" ''
+          # Set C2000Ware environment variable if it exists
+          if [ -d "$HOME/ti/C2000Ware_6_00_01_00" ]; then
+            export COM_TI_C2000WARE_INSTALL_DIR="$HOME/ti/C2000Ware_6_00_01_00"
+          elif [ -d "$HOME/ti/C2000Ware_6_00_00_00" ]; then
+            export COM_TI_C2000WARE_INSTALL_DIR="$HOME/ti/C2000Ware_6_00_00_00"
+          fi
+
           exec ${ccstudio-unwrapped}/opt/ccs/theia/ccstudio --disable-gpu "$@"
         '';
 
